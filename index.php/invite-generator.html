@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invite Generator | SkyBlockHaven</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+</head><body>
+
+<header>
+    <div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<div class="dashboard">
+<h1>🎟️ Invite Generator</h1>
+<p style="color:#999;margin-bottom:20px;">Create codes that grant a starting rank and role on registration.</p>
+
+<div class="grid" style="grid-template-columns:1fr 1.4fr;align-items:start;">
+
+    <div class="card" style="text-align:left;">
+        <h3 style="color:#4cc9ff;margin-bottom:14px;">New Invite</h3>
+        <label style="font-size:12px;color:#999;">Rank granted</label>
+        <select id="genRank"></select>
+        <label style="font-size:12px;color:#999;margin-top:10px;display:block;">Role granted</label>
+        <select id="genRole"></select>
+        <label style="font-size:12px;color:#999;margin-top:10px;display:block;">Max uses</label>
+        <input type="number" id="genUses" value="5" min="1">
+        <label style="font-size:12px;color:#999;margin-top:10px;display:block;">Expires</label>
+        <input type="text" id="genExpires" value="2026-12-31" placeholder="YYYY-MM-DD">
+        <button class="btn-sm primary" style="width:100%;margin-top:16px;padding:12px;" onclick="doGenerate()">Generate Code</button>
+    </div>
+
+    <div class="card" style="text-align:left;">
+        <h3 style="color:#4cc9ff;margin-bottom:14px;">Existing Invites</h3>
+        <table class="data-table" id="inviteTable">
+            <thead><tr><th>Code</th><th>Grants</th><th>Uses</th><th>Status</th></tr></thead>
+            <tbody id="inviteRows"></tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+const viewer = requirePermission("generate_invites");
+
+document.getElementById("genRank").innerHTML = RANKS.map(r => `<option>${r}</option>`).join('');
+document.getElementById("genRole").innerHTML = Object.keys(ROLES).map(r => `<option>${r}</option>`).join('');
+
+function renderInvites(){
+    const invites = getInvites();
+    const rows = document.getElementById("inviteRows");
+    rows.innerHTML = invites.map(i => `
+        <tr>
+            <td><span class="code-chip">${i.code}</span><div style="color:#666;font-size:10.5px;margin-top:3px;">by ${i.createdBy}</div></td>
+            <td>${rankBadge(i.rank)} ${roleBadge(i.role)}</td>
+            <td>${i.uses}/${i.maxUses}</td>
+            <td>${inviteStatus(i)}</td>
+        </tr>`).join('');
+}
+
+function doGenerate(){
+    const rank = document.getElementById("genRank").value;
+    const role = document.getElementById("genRole").value;
+    const uses = document.getElementById("genUses").value;
+    const expires = document.getElementById("genExpires").value.trim();
+    const invite = createInvite(rank, role, uses, expires, viewer.username);
+    renderInvites();
+    alert("Invite created: " + invite.code);
+}
+
+renderInvites();
+</script>
+
+</body></html>

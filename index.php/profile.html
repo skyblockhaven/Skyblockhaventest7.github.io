@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile | SkyBlockHaven</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+</head><body>
+
+<header>
+    <div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<div class="dashboard" id="notFound" style="display:none;text-align:center;">
+    <h1>😕 User not found</h1>
+    <p style="color:#999;margin:12px 0;">That account doesn't exist.</p>
+    <a class="btn" href="users.html">← Back to Users</a>
+</div>
+
+<div class="dashboard" id="profileRoot" style="display:none;">
+
+<div class="profile-header">
+    <div class="avatar-circle lg" id="pAvatar"></div>
+    <div class="info">
+        <h1 id="pUsername" style="margin-bottom:6px;"></h1>
+        <p id="pBadgesRoles" style="margin-bottom:8px;"></p>
+        <p class="online-pill" id="pStatus" style="margin-bottom:8px;"></p>
+        <p style="font-size:12.5px;color:#888;">Joined <span id="pJoined"></span> · Last online <span id="pLastOnline"></span></p>
+    </div>
+</div>
+
+<div class="section-block">
+    <h3>📝 Bio</h3>
+    <p id="pBio" style="color:#ccc;"></p>
+</div>
+
+<div class="section-block">
+    <h3>🏅 Badges</h3>
+    <div id="pBadgeList"></div>
+</div>
+
+<div class="section-block">
+    <h3>🏆 Public Achievements</h3>
+    <ul id="pAchievements" style="list-style:none;color:#ccc;"></ul>
+</div>
+
+<div class="section-block" id="mcBlock">
+    <h3>⛏️ Minecraft</h3>
+    <div id="mcContent"></div>
+</div>
+
+<div class="section-block" id="discordBlock" style="display:none;">
+    <h3>💬 Discord</h3>
+    <p id="pDiscord" style="color:#ccc;"></p>
+</div>
+
+<div class="section-block" id="editBlock" style="display:none;">
+    <h3>✏️ Edit Your Profile</h3>
+    <label>Avatar (emoji)</label>
+    <input type="text" id="editAvatar" maxlength="4" placeholder="🧑‍🌾">
+
+    <label>Or upload an avatar image</label>
+    <input type="file" id="avatarFileInput" accept="image/*">
+    <p id="avatarUploadStatus" style="font-size:12px;color:#888;margin:6px 0 4px;"></p>
+    <button type="button" class="btn-sm" id="removeAvatarImageBtn" style="display:none;margin-bottom:10px;">🗑️ Remove uploaded image</button>
+
+    <label>Bio</label>
+    <textarea id="editBio" rows="3" maxlength="280" placeholder="Tell people about yourself..."></textarea>
+    <label>Discord username (optional)</label>
+    <input type="text" id="editDiscord" placeholder="username">
+    <button class="btn-sm primary" onclick="saveOwnProfile()" style="margin-top:8px;">💾 Save Changes</button>
+
+    <div style="margin-top:20px;border-top:1px solid #30363d;padding-top:16px;">
+        <label>Link Minecraft Account</label>
+        <p style="font-size:12px;color:#888;margin-bottom:8px;">Enter your in-game Minecraft username. It must have joined the server at least once.</p>
+        <input type="text" id="mcLinkInput" placeholder="Minecraft username">
+        <button class="btn-sm" onclick="doLink()" style="margin-top:6px;">🔗 Link Account</button>
+        <p id="linkError" style="color:#ef4444;font-size:12.5px;margin-top:8px;"></p>
+    </div>
+</div>
+
+<div class="section-block" id="staffBlock" style="display:none;">
+    <h3>🛠️ Staff Tools</h3>
+    <div id="staffPanel"></div>
+</div>
+
+</div>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const targetUsername = params.get("user");
+const viewer = currentUser();
+
+let profileUser = targetUsername ? findUser(targetUsername) : null;
+
+if(!profileUser){
+    document.getElementById("notFound").style.display = "block";
+} else {
+    document.getElementById("profileRoot").style.display = "block";
+    renderProfile();
+}
+
+function renderProfile(){
+    const u = findUser(targetUsername); // re-read fresh each render
+    profileUser = u;
+    const online = isOnline(u);
+    const isOwner = viewer && viewer.username === u.username;
+    const canModerate = viewer && (hasPermission(viewer, "ban") || hasPermission(viewer, "timeout"));
+    const canManageRoles = viewer && hasPermission(viewer, "manage_users");
+    const canManageBadges = viewer && (canManageRoles || hasPermission(viewer, "manage_staff"));
+
+    document.getElementById("pAvatar").innerHTML = avatarHtml(u);
+    document.getElementById("pUsername").textContent = u.username;
+    document.getElementById("pBadgesRoles").innerHTML = roleBadge(u.role) + " " + rankBadge(u.rank);
+    document.getElementById("pStatus").innerHTML = `<span class="status-dot ${online ? "active" : "banned"}" style="${online ? "" : "background:#555;box-shadow:none;"}"></span>${online ? "Online now" : "Offline"}`;
+    document.getElementById("pJoined").textContent = u.joined;
+    document.getElementById("pLastOnline").textContent = relativeTime(u.lastOnline);
+    document.getElementById("pBio").textContent = u.bio || "This user hasn't written a bio yet.";
+
+    // Badges
+    const badgeList = document.getElementById("pBadgeList");
+    badgeList.innerHTML = u.badges.length
+        ? u.badges.map(b => `<span class="badge-pill">🏅 ${escapeHtml(b)}</span>`).join("")
+        : `<p style="color:#666;font-size:13px;">No badges yet.</p>`;
+    if(canManageBadges){
+        badgeList.innerHTML += `
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="text" id="newBadgeInput" placeholder="New badge name" style="width:auto;flex:1;min-width:140px;margin:0;">
+            <button class="btn-sm" onclick="doAddBadge()">+ Add</button>
+        </div>`;
+    }
+
+    // Achievements (derived from role/rank/badges — public, non-sensitive)
+    const achievements = [];
+    if(ROLES[u.role] && ROLES[u.role].tier <= 6) achievements.push("Staff Team Member — " + u.role);
+    if(u.rank === "VIP") achievements.push("VIP Rank Holder");
+    const joinedDate = new Date(u.joined);
+    if(!isNaN(joinedDate) && (Date.now() - joinedDate.getTime()) > 365 * 24 * 3600 * 1000) achievements.push("1+ Year Community Member");
+    u.badges.forEach(b => achievements.push("Earned badge: " + b));
+    document.getElementById("pAchievements").innerHTML = achievements.length
+        ? achievements.map(a => `<li style="padding:6px 0;border-bottom:1px solid #30363d33;">✅ ${escapeHtml(a)}</li>`).join("")
+        : `<li style="color:#666;">No public achievements yet.</li>`;
+
+    // Discord (only shown if the user has chosen to add one)
+    if(u.discordUsername){
+        document.getElementById("discordBlock").style.display = "block";
+        document.getElementById("pDiscord").textContent = u.discordUsername;
+    } else {
+        document.getElementById("discordBlock").style.display = "none";
+    }
+
+    // Minecraft
+    const mcContent = document.getElementById("mcContent");
+    if(u.minecraftUsername){
+        const player = findPlayerByUsername(u.minecraftUsername);
+        if(player){
+            mcContent.innerHTML = `
+            <p style="color:#ccc;">🎮 <strong>${escapeHtml(player.username)}</strong> ${player.online ? '<span class="status-dot active"></span>Online · ' + player.currentServer : '<span class="status-dot banned" style="background:#555;box-shadow:none;"></span>Offline'}</p>
+            <p style="font-size:12.5px;color:#888;margin-top:8px;">First joined ${player.firstJoined} · Last seen ${relativeTime(player.lastSeen)} · Playtime ${player.playtimeHours}h</p>`;
+        } else {
+            mcContent.innerHTML = `<p style="color:#888;">Linked account no longer found.</p>`;
+        }
+        if(isOwner){
+            mcContent.innerHTML += `<button class="btn-sm" style="margin-top:12px;" onclick="doUnlink()">🔓 Unlink Minecraft Account</button>`;
+        }
+    } else {
+        mcContent.innerHTML = `<p style="color:#888;">No Minecraft account linked${isOwner ? " — link yours below." : "."}</p>`;
+    }
+
+    // Edit block (owner only)
+    document.getElementById("editBlock").style.display = isOwner ? "block" : "none";
+    if(isOwner){
+        document.getElementById("editAvatar").value = u.avatar;
+        document.getElementById("editBio").value = u.bio;
+        document.getElementById("editDiscord").value = u.discordUsername;
+        document.getElementById("linkError").textContent = "";
+        document.getElementById("removeAvatarImageBtn").style.display = u.avatarImage ? "inline-block" : "none";
+        document.getElementById("avatarUploadStatus").textContent = u.avatarImage ? "Using an uploaded image as your avatar." : "";
+    }
+
+    // Staff tools (moderation + rank/role — never shown to the public)
+    const staffBlock = document.getElementById("staffBlock");
+    if(canModerate || canManageRoles){
+        staffBlock.style.display = "block";
+        document.getElementById("staffPanel").innerHTML = buildStaffPanel(u, canModerate, canManageRoles);
+    } else {
+        staffBlock.style.display = "none";
+    }
+}
+
+function buildStaffPanel(u, canModerate, canManageRoles){
+    let html = "";
+    if(canManageRoles){
+        html += `
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+            <div class="field" style="flex:1;min-width:140px;">
+                <label>Rank</label>
+                <select onchange="changeRank(this.value)">
+                    ${RANKS.map(r => `<option value="${r}" ${r===u.rank?'selected':''}>${r}</option>`).join('')}
+                </select>
+            </div>
+            <div class="field" style="flex:1;min-width:140px;">
+                <label>Role</label>
+                <select onchange="changeRole(this.value)">
+                    ${Object.keys(ROLES).map(r => `<option value="${r}" ${r===u.role?'selected':''}>${r}</option>`).join('')}
+                </select>
+            </div>
+        </div>`;
+    }
+    if(canModerate){
+        html += `
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <div class="field" style="flex:1;min-width:140px;"><label>Reason</label><input type="text" id="reasonInput" placeholder="e.g. Breaking server rules"></div>
+            <div class="field" style="flex:1;min-width:140px;"><label>Duration</label><input type="text" id="durationInput" placeholder="e.g. 7 Days / Permanent"></div>
+        </div>
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
+            ${!u.banned ? `<button class="btn-sm danger" onclick="doBan()">🔨 Ban</button>` : `<button class="btn-sm" onclick="doUnban()">🔓 Unban</button>`}
+            ${!u.timeout ? `<button class="btn-sm warn" onclick="doTimeout()">⏳ Timeout</button>` : `<button class="btn-sm" onclick="doUntimeout()">✅ Remove Timeout</button>`}
+        </div>`;
+    }
+    html += `
+    <div style="margin-top:16px;">
+        <label style="font-size:11px;text-transform:uppercase;color:#4cc9ff;">Recent history</label>
+        ${u.history.slice(0,5).map(h => `
+            <div class="history-item">
+                <div class="a">${escapeHtml(h.action)}${h.detail ? ': ' + escapeHtml(h.detail) : ''}${h.reason ? ' — ' + escapeHtml(h.reason) : ''}</div>
+                <div class="d">${h.staff ? 'Staff: ' + escapeHtml(h.staff) + ' · ' : ''}${h.duration ? 'Duration: ' + escapeHtml(h.duration) + ' · ' : ''}${h.date}</div>
+            </div>`).join('') || '<p style="color:#666;font-size:12px;">No history yet.</p>'}
+        <a href="user-history.html" style="color:#4cc9ff;font-size:12.5px;display:inline-block;margin-top:10px;">View full activity log →</a>
+    </div>`;
+    return html;
+}
+
+function changeRank(value){ setUserRank(targetUsername, value, viewer.username); renderProfile(); }
+function changeRole(value){ setUserRole(targetUsername, value, viewer.username); renderProfile(); }
+
+function doBan(){
+    const reason = document.getElementById("reasonInput")?.value;
+    const duration = document.getElementById("durationInput")?.value;
+    banUser(targetUsername, reason, duration, viewer.username);
+    renderProfile();
+}
+function doUnban(){ unbanUser(targetUsername, viewer.username); renderProfile(); }
+function doTimeout(){
+    const reason = document.getElementById("reasonInput")?.value;
+    const duration = document.getElementById("durationInput")?.value;
+    timeoutUser(targetUsername, reason, duration, viewer.username);
+    renderProfile();
+}
+function doUntimeout(){ removeTimeout(targetUsername, viewer.username); renderProfile(); }
+
+function doAddBadge(){
+    const input = document.getElementById("newBadgeInput");
+    if(!input || !input.value.trim()) return;
+    addBadge(targetUsername, input.value.trim(), viewer.username);
+    renderProfile();
+}
+
+function saveOwnProfile(){
+    updateOwnProfile(targetUsername, {
+        avatar: document.getElementById("editAvatar").value,
+        bio: document.getElementById("editBio").value,
+        discordUsername: document.getElementById("editDiscord").value
+    });
+    renderProfile();
+}
+
+// Resizes/crops the chosen image to a small square and re-encodes it as a
+// compressed JPEG data URL before saving. This keeps avatars well under
+// localStorage's size limits (a few dozen KB each) instead of storing
+// multi-megabyte originals straight from a phone camera.
+const AVATAR_MAX_SOURCE_BYTES = 8 * 1024 * 1024; // reject absurdly large picks up front
+const AVATAR_TARGET_PX = 160;
+
+document.getElementById("avatarFileInput").addEventListener("change", function(e){
+    const file = e.target.files[0];
+    const statusEl = document.getElementById("avatarUploadStatus");
+    if(!file) return;
+
+    if(!file.type.startsWith("image/")){
+        statusEl.textContent = "Please choose an image file.";
+        return;
+    }
+    if(file.size > AVATAR_MAX_SOURCE_BYTES){
+        statusEl.textContent = "That image is too large (max 8MB). Try a smaller one.";
+        return;
+    }
+
+    statusEl.textContent = "Processing image...";
+
+    const reader = new FileReader();
+    reader.onload = function(readerEvent){
+        const img = new Image();
+        img.onload = function(){
+            const canvas = document.createElement("canvas");
+            canvas.width = AVATAR_TARGET_PX;
+            canvas.height = AVATAR_TARGET_PX;
+            const ctx = canvas.getContext("2d");
+
+            // Center-crop to a square before scaling down, so the avatar
+            // isn't stretched for non-square source photos.
+            const side = Math.min(img.width, img.height);
+            const sx = (img.width - side) / 2;
+            const sy = (img.height - side) / 2;
+            ctx.drawImage(img, sx, sy, side, side, 0, 0, AVATAR_TARGET_PX, AVATAR_TARGET_PX);
+
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+
+            if(dataUrl.length > 200000){
+                statusEl.textContent = "That image is still too large after compression. Try a simpler photo.";
+                return;
+            }
+
+            updateOwnProfile(targetUsername, { avatarImage: dataUrl });
+            statusEl.textContent = "Avatar image updated!";
+            renderProfile();
+        };
+        img.onerror = function(){ statusEl.textContent = "Couldn't read that image file."; };
+        img.src = readerEvent.target.result;
+    };
+    reader.onerror = function(){ statusEl.textContent = "Couldn't read that file."; };
+    reader.readAsDataURL(file);
+});
+
+document.getElementById("removeAvatarImageBtn").addEventListener("click", function(){
+    updateOwnProfile(targetUsername, { avatarImage: null });
+    document.getElementById("avatarFileInput").value = "";
+    renderProfile();
+});
+
+function doLink(){
+    const mcUsername = document.getElementById("mcLinkInput").value.trim();
+    if(!mcUsername) return;
+    const result = linkMinecraftAccount(targetUsername, mcUsername, viewer.username);
+    document.getElementById("linkError").textContent = result.ok ? "" : result.error;
+    if(result.ok) renderProfile();
+}
+
+function doUnlink(){
+    unlinkMinecraftAccount(targetUsername, viewer.username);
+    renderProfile();
+}
+</script>
+
+</body></html>

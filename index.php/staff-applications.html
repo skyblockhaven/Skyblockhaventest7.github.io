@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⛏️ SkyBlockHaven - 📝 Staff Applications</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<header>
+<div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+<nav>
+<a href="index.html">🏠 Home</a>
+<a href="servers.html">🌐 Servers</a>
+<a href="news.html">📢 News</a>
+<a href="rules.html">📜 Rules</a>
+<a href="applications.html">📝 Applications</a>
+<a href="staff.html">👥 Staff</a>
+<a href="mods.html">🔧 Mods</a>
+<a href="discord.html">💬 Discord</a>
+<a href="forums.html">💬 Forums</a>
+<a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+<a href="admin.html">🛡️ Admin</a>
+    <div class="auth-area" id="authArea"></div>
+</nav>
+<button class="hamburger" id="hamburgerBtn">☰</button>
+</header>
+<main>
+<section class="card">
+<h1>📝 Staff Applications</h1>
+<p>Apply to join the SkyBlockHaven staff team.</p>
+<button class="button" id="openApplicationBtn">🟩 Open Application</button>
+</section>
+</main>
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+    document.getElementById("openApplicationBtn").addEventListener("click", function(){
+        window.location.href = "applications.html";
+    });
+</script>
+</body>
+</html>

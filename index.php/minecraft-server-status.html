@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⛏️ SkyBlockHaven - 🖥️ Minecraft Server Status</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<header>
+<div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+<nav>
+<a href="index.html">🏠 Home</a>
+<a href="servers.html">🌐 Servers</a>
+<a href="news.html">📢 News</a>
+<a href="rules.html">📜 Rules</a>
+<a href="applications.html">📝 Applications</a>
+<a href="staff.html">👥 Staff</a>
+<a href="mods.html">🔧 Mods</a>
+<a href="discord.html">💬 Discord</a>
+<a href="forums.html">💬 Forums</a>
+<a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+<a href="admin.html">🛡️ Admin</a>
+    <div class="auth-area" id="authArea"></div>
+</nav>
+<button class="hamburger" id="hamburgerBtn">☰</button>
+</header>
+<main>
+<section class="card">
+<h1>🖥️ Minecraft Server Status</h1>
+<p>Live status, pulled from the server itself — not a hardcoded label.</p>
+<div id="liveStatus" style="margin-top:14px;"></div>
+<button class="button" id="refreshStatusBtn" style="margin-top:10px;">🔄 Refresh</button>
+<p id="statusDetails" style="margin-top:10px;"></p>
+<button class="button" id="serverStatusBtn">📋 Show IP</button>
+</section>
+</main>
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script src="./js/live-status.js"></script>
+<script>
+    renderLiveStatus("liveStatus", serverIP01, false);
+    document.getElementById("refreshStatusBtn").addEventListener("click", function(){
+        renderLiveStatus("liveStatus", serverIP01, false);
+    });
+    document.getElementById("serverStatusBtn").addEventListener("click", function(){
+        document.getElementById("statusDetails").innerHTML =
+            "IP: <strong>" + serverIP01 + "</strong> — click to copy: " +
+            "<button class=\"button\" onclick=\"copyIP01()\">📋 Copy IP</button>";
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Players | SkyBlockHaven</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+</head><body>
+
+<header>
+    <div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<div class="dashboard">
+<h1>🎮 Minecraft Players</h1>
+<p style="color:#999;margin-bottom:6px;">Everyone who has joined the SkyBlockHaven Minecraft server.</p>
+<p style="color:#4cc9ff;font-weight:600;margin-bottom:20px;" id="onlineCount"></p>
+
+<div class="toolbar">
+    <input type="text" id="searchInput" placeholder="🔍 Search player...">
+    <select id="sortSelect">
+        <option value="lastSeen">Sort: Last seen</option>
+        <option value="username">Sort: Username (A–Z)</option>
+        <option value="firstJoined">Sort: First joined</option>
+        <option value="playtime">Sort: Playtime</option>
+    </select>
+    <label class="checkbox-label"><input type="checkbox" id="onlineOnly"> 🟢 Online only</label>
+</div>
+
+<p class="result-count" id="resultCount"></p>
+
+<div class="cards" id="playerGrid"></div>
+
+<div class="empty-state" id="emptyState" style="display:none;">No players match your search.</div>
+
+<div class="pagination" id="pagination"></div>
+<p style="color:#555;font-size:11.5px;margin-top:24px;">🔄 Auto-refreshing every 15s. This demo simulates live activity locally — connect a real server plugin/API in getPlayers() (js/auth.js) to replace it with actual data.</p>
+</div>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+const PAGE_SIZE = 12;
+let page = 1;
+
+const searchInput = document.getElementById("searchInput");
+const sortSelect = document.getElementById("sortSelect");
+const onlineOnly = document.getElementById("onlineOnly");
+
+function linkedWebsiteUser(mcUsername){
+    return getUsers().find(u => u.minecraftUsername && u.minecraftUsername.toLowerCase() === mcUsername.toLowerCase());
+}
+
+function formatPlaytime(hours){
+    if(hours < 24) return hours + "h";
+    return Math.floor(hours / 24) + "d " + (hours % 24) + "h";
+}
+
+function getFilteredPlayers(){
+    let players = getPlayers();
+    const q = searchInput.value.trim().toLowerCase();
+    if(q) players = players.filter(p => p.username.toLowerCase().includes(q));
+    if(onlineOnly.checked) players = players.filter(p => p.online);
+
+    const sort = sortSelect.value;
+    if(sort === "username") players.sort((a,b) => a.username.localeCompare(b.username));
+    else if(sort === "firstJoined") players.sort((a,b) => a.firstJoined.localeCompare(b.firstJoined));
+    else if(sort === "playtime") players.sort((a,b) => b.playtimeHours - a.playtimeHours);
+    else players.sort((a,b) => new Date(b.lastSeen) - new Date(a.lastSeen));
+
+    return players;
+}
+
+function render(){
+    simulatePlayerActivity();
+
+    const all = getFilteredPlayers();
+    const onlineNow = getPlayers().filter(p => p.online).length;
+    document.getElementById("onlineCount").textContent = `🟢 ${onlineNow} player${onlineNow === 1 ? "" : "s"} online now`;
+
+    const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+    if(page > totalPages) page = totalPages;
+    const slice = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    document.getElementById("resultCount").textContent = `${all.length} player${all.length === 1 ? "" : "s"} found`;
+
+    const grid = document.getElementById("playerGrid");
+    const empty = document.getElementById("emptyState");
+    grid.innerHTML = "";
+    empty.style.display = all.length ? "none" : "block";
+
+    slice.forEach(p => {
+        const linked = linkedWebsiteUser(p.username);
+        const linkOpen = linked ? `<a href="profile.html?user=${encodeURIComponent(linked.username)}" style="text-decoration:none;color:inherit;display:block;">` : `<div>`;
+        const linkClose = linked ? `</a>` : `</div>`;
+
+        grid.innerHTML += `
+        <div class="card">
+            ${linkOpen}
+            <h3>${escapeHtml(p.username)}</h3>
+            <p class="online-pill" style="justify-content:center;margin:8px 0;"><span class="status-dot ${p.online ? "active" : "banned"}" style="${p.online ? "" : "background:#555;box-shadow:none;"}"></span>${p.online ? "Online · " + p.currentServer : "Offline"}</p>
+            <p style="font-size:11.5px;color:#666;">UUID: <span class="code-chip" style="font-size:10.5px;">${p.uuid.slice(0,8)}…</span></p>
+            <p style="font-size:11.5px;color:#666;margin-top:6px;">First joined ${p.firstJoined}<br>Last seen: ${relativeTime(p.lastSeen)}<br>Playtime: ${formatPlaytime(p.playtimeHours)}</p>
+            ${linked ? `<p style="margin-top:10px;font-size:11.5px;color:#4cc9ff;">🔗 Linked to @${escapeHtml(linked.username)}</p>` : `<p style="margin-top:10px;font-size:11px;color:#555;">Not linked to a website account</p>`}
+            ${linkClose}
+        </div>`;
+    });
+
+    const pag = document.getElementById("pagination");
+    if(totalPages <= 1){ pag.innerHTML = ""; return; }
+    pag.innerHTML = `
+        <button class="btn-sm" ${page === 1 ? "disabled" : ""} onclick="changePage(${page - 1})">← Prev</button>
+        <span>Page ${page} of ${totalPages}</span>
+        <button class="btn-sm" ${page === totalPages ? "disabled" : ""} onclick="changePage(${page + 1})">Next →</button>`;
+}
+
+function changePage(p){ page = p; render(); }
+
+searchInput.addEventListener("input", () => { page = 1; render(); });
+sortSelect.addEventListener("change", () => { page = 1; render(); });
+onlineOnly.addEventListener("change", () => { page = 1; render(); });
+
+render();
+setInterval(render, 15000);
+</script>
+
+</body></html>

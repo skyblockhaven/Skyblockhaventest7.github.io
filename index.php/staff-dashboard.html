@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Staff Dashboard | SkyBlockHaven</title>
+
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+
+<style>
+
+body{
+background:#0b0f1a;
+color:white;
+font-family:Arial;
+}
+
+.container{
+padding:110px 30px 30px;
+}
+
+.panel{
+background:#151b2d;
+padding:25px;
+margin:20px;
+border-radius:15px;
+border:1px solid #55ffff;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+        <a href="staff-dashboard.html">🛡️ Staff Panel</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<div class="container">
+
+<h1>👥 Staff Dashboard</h1>
+<p id="staffGreeting" style="color:#999;margin-bottom:10px;"></p>
+
+
+<div class="panel">
+
+<h2>📝 Staff Applications</h2>
+
+<p>
+Review new staff applications
+</p>
+
+<button onclick="window.location.href='staff-applications.html'">
+Open Applications
+</button>
+
+</div>
+
+
+<div class="panel">
+
+<h2>🎫 Tickets</h2>
+
+<p>
+Manage player support tickets
+</p>
+
+<button onclick="window.location.href='support-tickets.html'">
+Open Tickets
+</button>
+
+</div>
+
+
+<div class="panel" id="reportsPanel">
+
+<h2>⚠ Reports</h2>
+
+<p>
+Review player reports
+</p>
+
+<button>
+View Reports
+</button>
+
+</div>
+
+
+<div class="panel">
+
+<h2>🎮 Players</h2>
+
+<p>
+View the Minecraft player list and linked accounts
+</p>
+
+<button onclick="window.location.href='players.html'">
+Open Players
+</button>
+
+</div>
+
+
+<div class="panel" id="modPanel">
+
+<h2>🛠 Moderation Tools</h2>
+
+<p>Ban, unban, timeout, and rank/role changes live on each player's profile.</p>
+
+<button onclick="window.location.href='users.html'">
+Open Users
+</button>
+
+</div>
+
+
+<div class="panel" id="invitePanel" style="display:none;">
+
+<h2>🎟️ Invite Generator</h2>
+
+<p>Create invite codes for new members.</p>
+
+<button onclick="window.location.href='invite-generator.html'">
+Open Invite Generator
+</button>
+
+</div>
+
+
+</div>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+    // Any role tier 1-6 (everyone except plain Members) can view this page.
+    // requireTier() redirects (to login.html if signed out, or
+    // users.html if signed in without staff access) and returns null
+    // in both cases, so we only build the rest of the page when it
+    // actually returns a user.
+    const staffUser = requireTier(6);
+
+    if(staffUser){
+        document.getElementById("staffGreeting").textContent =
+            "Signed in as " + staffUser.username + " (" + staffUser.role + ")";
+
+        // Hide tools this role isn't permitted to use
+        if(!hasPermission(staffUser, "reports") && !hasPermission(staffUser, "manage_reports")){
+            document.getElementById("reportsPanel").style.display = "none";
+        }
+        if(!hasPermission(staffUser, "ban") && !hasPermission(staffUser, "timeout")){
+            document.getElementById("modPanel").style.display = "none";
+        }
+        if(hasPermission(staffUser, "generate_invites")){
+            document.getElementById("invitePanel").style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>

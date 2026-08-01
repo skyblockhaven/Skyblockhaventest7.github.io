@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⛏️ SkyBlockHaven - ⚙️ Website Settings</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<header>
+<div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+<nav>
+<a href="index.html">🏠 Home</a>
+<a href="servers.html">🌐 Servers</a>
+<a href="news.html">📢 News</a>
+<a href="rules.html">📜 Rules</a>
+<a href="applications.html">📝 Applications</a>
+<a href="staff.html">👥 Staff</a>
+<a href="mods.html">🔧 Mods</a>
+<a href="discord.html">💬 Discord</a>
+<a href="forums.html">💬 Forums</a>
+<a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+<a href="admin-dashboard.html">🛡️ Admin</a>
+    <div class="auth-area" id="authArea"></div>
+</nav>
+<button class="hamburger" id="hamburgerBtn">☰</button>
+</header>
+<main>
+<section class="card">
+<h1>⚙️ Website Settings</h1>
+<p>Manage website configuration and dashboard preferences.</p>
+<button class="button" id="manageSettingsBtn">⚙️ Manage Settings</button>
+<p id="settingsStatus" style="margin-top:10px;"></p>
+</section>
+</main>
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+    // Owner-only (the only role with the manage_site permission)
+    requirePermission("manage_site");
+
+    document.getElementById("manageSettingsBtn").addEventListener("click", function(){
+        document.getElementById("settingsStatus").textContent =
+            "⚙️ Settings panel coming soon.";
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyBlockHaven | Servers</title>
+
+    <link rel="icon" href="./site/assets/Skyblockhaven.ico">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        ⛏️ <span>SkyBlockHaven</span>
+    </div>
+
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+        <a href="admin.html">🛡️ Admin soon</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<audio id="bgMusic" loop src="./site/source/SkyBlockHaven.mp3"></audio>
+<button class="music-toggle" id="musicToggle" aria-label="Toggle music">🔇</button>
+
+<section class="hero">
+
+    <div class="bg-video-wrap">
+        <video class="bg-video" autoplay muted loop playsinline>
+            <source src="./site/source/SkyBlockHaven.mp4" type="video/mp4">
+        </video>
+    </div>
+    
+    <h1>🌐 Server Information</h1>
+    <p>Everything you need to join SkyBlockHaven.</p>
+</section>
+
+<section class="features">
+
+    <div class="card">
+        <h3>🎮 Java Edition</h3>
+        <h3>SkyBlockHaven SMP</h3>
+        <p>Type: Survival Multiplayer</p>
+        <div id="liveStatusMain"><div class="status-row"><span class="dot online"></span><span>Online</span></div></div>
+        <p><strong>IP:</strong> <span id="serverIPLabel">shsmp.skyblockhaven.com</span></p>
+        <div class="buttons">
+        <button class="btn" onclick="copyIP01()">📋 Copy Server IP</button>
+    </div>
+    </div>
+
+     <div class="card">
+        <h3>🎮 Java Edition soon</h3>
+         <h3>soon</h3>
+         <p>Type: Anarchy Survival</p>
+        <div class="status-row"><span class="dot offline"></span><span>Offline</span></div>
+        <p><strong>Address:</strong> anarchy.skyblockhaven.com</p>
+        <p><strong>Version:</strong> ??.??.??</p>
+         <div class="buttons">
+        <button class="btn" onclick="copyIP02()">📋 soon</button>
+    </div>
+         
+    </div>
+
+    <div class="card">
+        <h3>📱 Bedrock Edition</h3>
+        <h3>SkyBlockHaven SMP</h3>
+        <p>Type: Survival Multiplayer</p>
+        <div class="status-row"><span class="dot Maintenance"></span><span>Maintenance</span></div>
+        <p><strong>Address:</strong> shsmp.skyblockhaven.com</p>
+        <p><strong>Port:</strong> soon</p>
+    </div>
+
+    <div class="card">
+        <h3>info Server Status </h3>
+        <p>🟢 Online</p>
+        <p>The server is online and running normally.</p>
+        <p>🟡 Maintenance</p>
+        <p>The server is temporarily unavailable while we perform updates, bug fixes, or improvements.</p>
+        <p>🔴 Offline</p>
+        <p>The server is currently offline due to an unexpected issue or scheduled downtime.</p>
+        <h3>More Information down below</h3>
+    </div>
+
+</section>
+
+<section class="features">
+    
+    <div class="card">
+        <h3>🟢 Online</h3>
+        <p>The server is online and running normally.</p>
+        <p>Players can join and enjoy all available features.</p>
+        <p>No known issues are affecting gameplay.</p>
+        <h3>More Information</h3>
+        <p>✅ Server is accepting player connections.</p>
+        <p>✅ Gameplay is fully available.</p>
+        <p>✅ Most features and services are operational.</p>
+        <p>✅ Staff are available to help if needed.</p>
+        <p>📢 Check Discord for the latest announcements and events.</p>
+    </div>
+
+    <div class="card">
+        <h3>🟡 Maintenance</h3>
+        <p>The server is temporarily unavailable while we perform updates, bug fixes, or improvements.</p>
+        <p>We'll be back online as soon as maintenance is complete.</p>
+        <p>Thank you for your patience.</p>
+        <h3>More Information</h3>
+        <p>🔧 Scheduled maintenance or emergency fixes are in progress.</p>
+        <p>⏳ The server will return as soon as possible.</p>
+        <p>📢 Progress updates will be posted on Discord.</p>
+        <p>💾 Player data is safe unless otherwise announced.</p>
+        <p>💙 Thank you for your patience and understanding.</p>
+    </div>
+    
+    <div class="card">
+        <h3>🔴 Offline</h3>
+        <p>The server is currently offline due to an unexpected issue or scheduled downtime.</p>
+        <p>Our team is working to restore service as quickly as possible.</p>
+        <p>Please check back later for updates.</p>
+        <h3>More Information</h3>
+        <p>❌ The server is not accepting player connections.</p>
+        <p>🔍 Our team is investigating or fixing the issue.</p>
+        <p>⏳ There is currently no confirmed return time unless announced.</p>
+        <p>📢 Follow Discord for updates and announcements.</p>
+        <p>💙 Thank you for your patience while we restore the server</p>
+    </div>
+
+    <div class="card">
+        <h3>⛏️ SkyBlock</h3>
+        <p>Create your base, expand it, complete challenges, and build your economy as you progress through the server.</p>
+        <p>Gather valuable resources, unlock new upgrades, trade with other players, and earn rewards by completing quests and achievements.</p>
+        <p>Whether you enjoy building, farming, mining, or exploring, there's always something new to accomplish on your journey.</p>
+    </div>
+
+    <div class="card">
+        <h3>⚔️ SMP</h3>
+        <h3>Features:</h3>
+        <p>Community survival</p>
+        <p>Player builds</p>
+        <p>Events</p>
+        <p>PvP enabled</p>
+        <p>Economy</p>
+        <p>Friendly gameplay</p>
+        <h3>Create. Explore. Build Together.</h3>
+    </div>
+    
+    <div class="card">
+        <h3>⚔️ anarchy</h3>
+        <h3>Features:</h3>
+        <p>Griefing allowed</p>
+        <p>Raiding allowed</p>
+        <p>Stealing allowed</p>
+        <p>PvP enabled</p>
+        <p>Player wars and empires</p>
+        <p>Minimal rules</p>
+        <h3>Trust No One. Build Wisely. Survive the Chaos.</h3>
+    </div>
+    
+    
+    <div class="card">
+        <h3>⚔️ Events</h3>
+        <p>soon</p>
+    </div>
+
+    <div class="card">
+        <h3>💰 Economy</h3>
+        <p>soon</p>
+    </div>
+
+</section>
+
+<footer>
+    <p>© 2025 SkyBlockHaven. All Rights Reserved.</p>
+</footer>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script src="./js/live-status.js"></script>
+<script>
+    document.getElementById("serverIPLabel").textContent = serverIP01;
+    renderLiveStatus("liveStatusMain", serverIP01, false);
+</script>
+
+</body>
+</html>

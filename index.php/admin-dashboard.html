@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Admin Dashboard | SkyBlockHaven</title>
+
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+
+<style>
+
+body{
+background:#0b0f1a;
+color:white;
+font-family:Arial;
+}
+
+.container{
+padding:110px 30px 30px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+}
+
+.card{
+background:#151b2d;
+padding:25px;
+border-radius:15px;
+border:1px solid #55ffff;
+text-align:center;
+}
+
+.card button{
+margin-top:10px;
+margin-right:6px;
+padding:6px 12px;
+border:none;
+border-radius:6px;
+background:#2563eb;
+color:#fff;
+cursor:pointer;
+}
+
+.card button:hover{
+background:#4cc9ff;
+color:#0d1117;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+        <a href="admin-dashboard.html">🛡️ Admin</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<div class="container">
+
+<h1>🛡️ Admin Dashboard</h1>
+
+<div class="grid" id="statGrid" style="margin-bottom:30px;"></div>
+
+<div class="grid">
+
+<a class="card" href="users.html" style="text-decoration:none;color:inherit;display:block;">
+<h2>🗂️ Users</h2>
+<p>Browse & search accounts</p>
+</a>
+
+<a class="card" href="players.html" style="text-decoration:none;color:inherit;display:block;">
+<h2>🎮 Players</h2>
+<p>Minecraft player list</p>
+</a>
+
+<a class="card" href="staff.html" style="text-decoration:none;color:inherit;display:block;">
+<h2>👥 Staff</h2>
+<p>Manage Team</p>
+</a>
+
+<a class="card" href="invite-generator.html" style="text-decoration:none;color:inherit;display:block;">
+<h2>🎟️ Invites</h2>
+<p>Generate & track codes</p>
+</a>
+
+<a class="card" href="support-tickets.html" style="text-decoration:none;color:inherit;display:block;">
+<h2>🎫 Tickets</h2>
+<p>Support Center</p>
+</a>
+
+<a class="card" href="news-announcements.html" style="text-decoration:none;color:inherit;display:block;">
+<h2>📢 News</h2>
+<p>Announcements</p>
+</a>
+
+<a class="card" href="website-settings.html" style="text-decoration:none;color:inherit;display:block;">
+<h2>⚙ Settings</h2>
+<p>Website Controls</p>
+</a>
+
+<a class="card" href="user-history.html" style="text-decoration:none;color:inherit;display:block;">
+<h2>📜 Logs</h2>
+<p>Activity History</p>
+</a>
+
+</div>
+
+<h2 style="margin-top:40px;">🗂️ Account Management</h2>
+<button onclick="exportUsersCSV()" style="margin:12px 0 20px;padding:8px 16px;border:none;border-radius:6px;background:#2563eb;color:#fff;cursor:pointer;">⬇ Export User List (CSV)</button>
+<div class="grid" id="userList"></div>
+
+</div>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script src="./js/dashboard.js"></script>
+<script>
+    // Owner / Co-Owner / Administrator — the roles with manage_users permission
+    requirePermission("manage_users");
+    loadAdminStats();
+    loadAdminUsers();
+</script>
+
+</body>
+</html>

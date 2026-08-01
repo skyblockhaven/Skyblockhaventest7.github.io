@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History Log | SkyBlockHaven</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+</head><body>
+
+<header>
+    <div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+<a href="players.html">🎮 Players</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<div class="dashboard">
+<h1>📜 History Log</h1>
+<p style="color:#999;margin-bottom:20px;">Every logged action across the server, most recent first.</p>
+
+<div class="toolbar">
+    <input type="text" id="filterInput" placeholder="Filter by username..." style="max-width:260px;">
+</div>
+
+<div class="card" style="text-align:left;">
+    <div id="logList"></div>
+</div>
+</div>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script>
+const viewer = requirePermission("view_logs");
+
+function renderLog(filter){
+    const log = getGlobalLog();
+    const filtered = filter
+        ? log.filter(h => h.user.toLowerCase().includes(filter.toLowerCase()))
+        : log;
+
+    document.getElementById("logList").innerHTML = filtered.length
+        ? filtered.map(h => `
+            <div class="history-item">
+                <div class="a">${h.user} — ${h.action}${h.detail ? ': ' + h.detail : ''}${h.reason ? ' — ' + h.reason : ''}</div>
+                <div class="d">${h.staff ? 'Staff: ' + h.staff + ' · ' : ''}${h.duration ? 'Duration: ' + h.duration + ' · ' : ''}${h.date}</div>
+            </div>`).join('')
+        : `<p style="color:#666;">No matching history.</p>`;
+}
+
+document.getElementById("filterInput").addEventListener("input", (e) => renderLog(e.target.value.trim()));
+
+renderLog("");
+</script>
+
+</body></html>

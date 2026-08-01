@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forums | SkyBlockHaven</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+<style>
+    .thread-row{ background:#161b22; border:1px solid #30363d; border-radius:12px; padding:16px 18px; margin-bottom:12px; cursor:pointer; transition:.2s; }
+    .thread-row:hover{ border-color:#4cc9ff; }
+    .thread-row h3{ font-size:16px; margin-bottom:4px; }
+    .thread-meta{ color:#999; font-size:12.5px; }
+    .thread-pin{ color:#facc15; margin-right:6px; }
+    .thread-lock{ color:#ef4444; margin-right:6px; }
+    .cat-pill{ display:inline-block; padding:3px 10px; border-radius:20px; font-size:11.5px; border:1px solid #30363d; color:#4cc9ff; margin-bottom:8px; }
+    .reply-item{ background:#0d1117; border:1px solid #30363d; border-radius:10px; padding:12px 14px; margin-top:10px; }
+    .reply-meta{ color:#999; font-size:12px; margin-bottom:4px; }
+    .new-thread-form input, .new-thread-form select, .new-thread-form textarea{
+        width:100%; padding:12px; border-radius:8px; border:1px solid #30363d;
+        margin-bottom:10px; background:#0d1117; color:#fff; font-family:inherit; font-size:1rem;
+    }
+    .new-thread-form textarea{ min-height:100px; resize:vertical; }
+    .back-link{ display:inline-block; margin-bottom:16px; color:#4cc9ff; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+        <a href="players.html">🎮 Players</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<div class="dashboard" id="listView">
+<h1>💬 Forums</h1>
+<p style="color:#999;margin-bottom:20px;">Talk strategy, get support, or suggest what's next for SkyBlockHaven.</p>
+
+<div class="toolbar">
+    <input type="text" id="searchInput" placeholder="🔍 Search threads...">
+    <select id="categorySelect">
+        <option value="">All categories</option>
+    </select>
+</div>
+
+<div id="newThreadArea" style="margin-bottom:22px;"></div>
+
+<p class="result-count" id="resultCount"></p>
+<div id="threadList"></div>
+<div class="empty-state" id="emptyState" style="display:none;">No threads match your search.</div>
+</div>
+
+<div class="dashboard" id="detailView" style="display:none;">
+<a href="#" class="back-link" id="backLink">← Back to all threads</a>
+<div class="card" id="threadDetail"></div>
+<div id="repliesArea"></div>
+<div id="replyFormArea" style="margin-top:18px;"></div>
+</div>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script src="./js/forums.js"></script>
+<script>
+
+const categorySelect = document.getElementById("categorySelect");
+FORUM_CATEGORIES.forEach(c => {
+    let opt = document.createElement("option");
+    opt.value = c; opt.textContent = c;
+    categorySelect.appendChild(opt);
+});
+
+function renderNewThreadForm(){
+    const user = currentUser();
+    const area = document.getElementById("newThreadArea");
+    if(!user){
+        area.innerHTML = `<p style="color:#999;">
+            <a href="login.html" style="color:#4cc9ff;">Sign in</a> to start a new thread.</p>`;
+        return;
+    }
+    area.innerHTML = `
+        <div class="card new-thread-form">
+            <h3>Start a new thread</h3>
+            <select id="newCategory">${FORUM_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join("")}</select>
+            <input type="text" id="newTitle" placeholder="Thread title" maxlength="120">
+            <textarea id="newBody" placeholder="What's on your mind?"></textarea>
+            <button class="btn" id="postThreadBtn">📝 Post Thread</button>
+        </div>`;
+    document.getElementById("postThreadBtn").addEventListener("click", function(){
+        const category = document.getElementById("newCategory").value;
+        const title = document.getElementById("newTitle").value;
+        const body = document.getElementById("newBody").value;
+        const result = createThread(category, title, body, user.username);
+        if(!result.ok){ alert(result.error); return; }
+        renderList();
+    });
+}
+
+function threadCard(t){
+    const replyCount = t.replies.length;
+    return `<div class="thread-row" data-id="${t.id}">
+        <span class="cat-pill">${escapeHtml(t.category)}</span>
+        <h3>${t.pinned ? '<span class="thread-pin">📌</span>' : ""}${t.locked ? '<span class="thread-lock">🔒</span>' : ""}${escapeHtml(t.title)}</h3>
+        <p class="thread-meta">by ${escapeHtml(t.author)} · ${relativeTime(t.createdAt)} · ${replyCount} repl${replyCount === 1 ? "y" : "ies"}</p>
+    </div>`;
+}
+
+function renderList(){
+    document.getElementById("detailView").style.display = "none";
+    document.getElementById("listView").style.display = "block";
+    renderNewThreadForm();
+
+    const search = document.getElementById("searchInput").value.toLowerCase();
+    const cat = categorySelect.value;
+
+    let threads = getThreads()
+        .filter(t => !cat || t.category === cat)
+        .filter(t => !search || t.title.toLowerCase().includes(search) || t.body.toLowerCase().includes(search))
+        .sort((a, b) => (b.pinned - a.pinned) || (new Date(b.createdAt) - new Date(a.createdAt)));
+
+    document.getElementById("resultCount").textContent = threads.length + " thread" + (threads.length === 1 ? "" : "s");
+    document.getElementById("emptyState").style.display = threads.length ? "none" : "block";
+
+    const list = document.getElementById("threadList");
+    list.innerHTML = threads.map(threadCard).join("");
+    list.querySelectorAll(".thread-row").forEach(row => {
+        row.addEventListener("click", () => openThread(row.dataset.id));
+    });
+}
+
+function openThread(id){
+    const thread = findThread(id);
+    if(!thread) return;
+    window.location.hash = "thread=" + id;
+    document.getElementById("listView").style.display = "none";
+    document.getElementById("detailView").style.display = "block";
+
+    const user = currentUser();
+    const tier = (ROLES[user?.role] || {}).tier ?? 9;
+    const isStaff = tier <= 6;
+
+    document.getElementById("threadDetail").innerHTML = `
+        <span class="cat-pill">${escapeHtml(thread.category)}</span>
+        <h1>${thread.pinned ? "📌 " : ""}${thread.locked ? "🔒 " : ""}${escapeHtml(thread.title)}</h1>
+        <p class="thread-meta">by ${escapeHtml(thread.author)} · ${relativeTime(thread.createdAt)}</p>
+        <p style="margin-top:14px;white-space:pre-wrap;">${escapeHtml(thread.body)}</p>
+        ${isStaff ? `
+        <div class="buttons" style="margin-top:16px;">
+            <button class="btn-sm" id="pinBtn">${thread.pinned ? "Unpin" : "📌 Pin"}</button>
+            <button class="btn-sm warn" id="lockBtn">${thread.locked ? "Unlock" : "🔒 Lock"}</button>
+            <button class="btn-sm danger" id="deleteBtn">🗑️ Delete</button>
+        </div>` : ""}
+    `;
+
+    if(isStaff){
+        document.getElementById("pinBtn").addEventListener("click", () => { togglePin(thread.id); openThread(thread.id); });
+        document.getElementById("lockBtn").addEventListener("click", () => { toggleLock(thread.id); openThread(thread.id); });
+        document.getElementById("deleteBtn").addEventListener("click", () => {
+            if(confirm("Delete this thread permanently?")){ deleteThread(thread.id); renderList(); }
+        });
+    }
+
+    document.getElementById("repliesArea").innerHTML = thread.replies.map(r => `
+        <div class="reply-item">
+            <p class="reply-meta">${escapeHtml(r.author)} · ${relativeTime(r.createdAt)}</p>
+            <p style="white-space:pre-wrap;">${escapeHtml(r.body)}</p>
+        </div>`).join("");
+
+    const replyArea = document.getElementById("replyFormArea");
+    if(!user){
+        replyArea.innerHTML = `<p style="color:#999;"><a href="login.html" style="color:#4cc9ff;">Sign in</a> to reply.</p>`;
+    } else if(thread.locked){
+        replyArea.innerHTML = `<p style="color:#999;">🔒 This thread is locked.</p>`;
+    } else {
+        replyArea.innerHTML = `
+            <div class="card new-thread-form">
+                <textarea id="replyBody" placeholder="Write a reply..."></textarea>
+                <button class="btn" id="postReplyBtn">💬 Reply</button>
+            </div>`;
+        document.getElementById("postReplyBtn").addEventListener("click", function(){
+            const result = addReply(thread.id, user.username, document.getElementById("replyBody").value);
+            if(!result.ok){ alert(result.error); return; }
+            openThread(thread.id);
+        });
+    }
+}
+
+document.getElementById("searchInput").addEventListener("input", renderList);
+categorySelect.addEventListener("change", renderList);
+document.getElementById("backLink").addEventListener("click", function(e){
+    e.preventDefault();
+    window.location.hash = "";
+    renderList();
+});
+
+const hashId = window.location.hash.startsWith("#thread=") ? window.location.hash.slice(8) : null;
+if(hashId){ openThread(hashId); } else { renderList(); }
+
+</script>
+</body>
+</html>

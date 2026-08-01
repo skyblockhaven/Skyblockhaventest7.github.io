@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polls | SkyBlockHaven</title>
+<link rel="icon" href="./site/assets/Skyblockhaven.ico">
+<link rel="stylesheet" href="./css/style.css">
+<style>
+    .poll-card{ margin-bottom:18px; }
+    .poll-option{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .poll-option button{
+        flex:1; text-align:left; padding:10px 14px; border-radius:8px; border:1px solid #30363d;
+        background:#0d1117; color:#fff; cursor:pointer; font-family:inherit; font-size:.95rem;
+    }
+    .poll-option button:hover{ border-color:#4cc9ff; }
+    .poll-bar-wrap{ flex:1; }
+    .poll-bar-label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px; }
+    .poll-bar-track{ background:#0d1117; border:1px solid #30363d; border-radius:6px; height:10px; overflow:hidden; }
+    .poll-bar-fill{ background:#4cc9ff; height:100%; }
+    .poll-meta{ color:#999; font-size:12.5px; margin-top:8px; }
+    .new-poll-form input, .new-poll-form textarea{
+        width:100%; padding:12px; border-radius:8px; border:1px solid #30363d;
+        margin-bottom:10px; background:#0d1117; color:#fff; font-family:inherit; font-size:1rem;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">⛏️ <span>SkyBlockHaven</span></div>
+    <nav>
+        <a href="index.html">🏠 Home</a>
+        <a href="servers.html">🌐 Servers</a>
+        <a href="news.html">📢 News</a>
+        <a href="rules.html">📜 Rules</a>
+        <a href="applications.html">📝 Applications</a>
+        <a href="staff.html">👥 Staff</a>
+        <a href="mods.html">🔧 Mods</a>
+        <a href="discord.html">💬 Discord</a>
+        <a href="forums.html">💬 Forums</a>
+        <a href="polls.html">📊 Polls</a>
+        <a href="users.html">🗂️ Users</a>
+        <a href="players.html">🎮 Players</a>
+        <div class="auth-area" id="authArea"></div>
+    </nav>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+</header>
+
+<div class="dashboard">
+<h1>📊 Community Polls</h1>
+<p style="color:#999;margin-bottom:20px;">Vote once per account. Results update live.</p>
+
+<div id="newPollArea" style="margin-bottom:22px;"></div>
+<div id="pollList"></div>
+</div>
+
+<script src="./js/script.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/notifications.js"></script>
+<script src="./js/polls.js"></script>
+<script>
+
+function renderNewPollForm(){
+    const user = currentUser();
+    const tier = (ROLES[user?.role] || {}).tier ?? 9;
+    const area = document.getElementById("newPollArea");
+
+    if(!user || tier > POLL_CREATE_MIN_TIER){
+        area.innerHTML = "";
+        return;
+    }
+
+    area.innerHTML = `
+        <div class="card new-poll-form">
+            <h3>Create a poll</h3>
+            <input type="text" id="newQuestion" placeholder="Poll question" maxlength="200">
+            <textarea id="newOptions" placeholder="One option per line (min 2)" style="min-height:90px;"></textarea>
+            <button class="btn" id="createPollBtn">📊 Create Poll</button>
+        </div>`;
+
+    document.getElementById("createPollBtn").addEventListener("click", function(){
+        const question = document.getElementById("newQuestion").value;
+        const options = document.getElementById("newOptions").value.split("\n");
+        const result = createPoll(question, options, user.username, null);
+        if(!result.ok){ alert(result.error); return; }
+        renderPolls();
+    });
+}
+
+function pollCard(poll, user, tier){
+    const totalVotes = poll.options.reduce((sum, o) => sum + o.votes, 0);
+    const closed = isPollClosed(poll);
+    const voted = hasVoted(poll, user?.username);
+    const isStaff = tier <= 6;
+
+    let optionsHtml;
+    if(voted || closed || !user){
+        optionsHtml = poll.options.map(o => {
+            const pct = totalVotes ? Math.round((o.votes / totalVotes) * 100) : 0;
+            return `
+                <div class="poll-bar-wrap">
+                    <div class="poll-bar-label"><span>${escapeHtml(o.text)}</span><span>${pct}% (${o.votes})</span></div>
+                    <div class="poll-bar-track"><div class="poll-bar-fill" style="width:${pct}%;"></div></div>
+                </div>`;
+        }).join("");
+    } else {
+        optionsHtml = poll.options.map(o => `
+            <div class="poll-option">
+                <button data-poll="${poll.id}" data-option="${o.id}">${escapeHtml(o.text)}</button>
+            </div>`).join("");
+    }
+
+    return `
+        <div class="card poll-card">
+            <h3>${escapeHtml(poll.question)}</h3>
+            ${optionsHtml}
+            <p class="poll-meta">
+                ${totalVotes} vote${totalVotes === 1 ? "" : "s"} ·
+                by ${escapeHtml(poll.createdBy)} ·
+                ${closed ? "🔒 Closed" : (voted ? "✅ You voted" : (!user ? "Sign in to vote" : "Open"))}
+                ${isStaff ? ` · <a href="#" data-delete="${poll.id}" style="color:#ef4444;">Delete</a>` : ""}
+            </p>
+        </div>`;
+}
+
+function renderPolls(){
+    renderNewPollForm();
+    const user = currentUser();
+    const tier = (ROLES[user?.role] || {}).tier ?? 9;
+    const polls = getPolls().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const list = document.getElementById("pollList");
+    list.innerHTML = polls.length
+        ? polls.map(p => pollCard(p, user, tier)).join("")
+        : `<div class="empty-state">No polls yet.</div>`;
+
+    list.querySelectorAll("[data-poll]").forEach(btn => {
+        btn.addEventListener("click", function(){
+            const result = votePoll(btn.dataset.poll, btn.dataset.option, user?.username);
+            if(!result.ok){ alert(result.error); return; }
+            renderPolls();
+        });
+    });
+
+    list.querySelectorAll("[data-delete]").forEach(link => {
+        link.addEventListener("click", function(e){
+            e.preventDefault();
+            if(confirm("Delete this poll permanently?")){
+                deletePoll(link.dataset.delete);
+                renderPolls();
+            }
+        });
+    });
+}
+
+renderPolls();
+
+</script>
+</body>
+</html>
